@@ -53,9 +53,9 @@ WHAT I NEED:
 //Finding out setup() and loop() were just part of the Arduino library made me uncomfortable...
 //An empty sketch is only like 150 bytes what the hell
 
-#define GATE_PIN PIN_9 //PB1 - PWM OC1A
-#define LED1 PIN_6 //PD6 - PWM OC0A
-#define SENSOR1 PIN_A0 //PC0
+#define GATE_PIN PIN_9  //GATE PIN - PB1 - PWM OC1A
+#define LED1 PIN_6		//LED1 PIN - PD6 - PWM OC0A
+#define SENSOR1 PIN_A0  //PC0
 
 #define LED1_DUTY 120 //0-255, duty cycle of LED PWM
 
@@ -118,7 +118,6 @@ int main() {
 	timer1_interrupt_masks(0b00000010);
 	adc_enable_interrupt();
 	sei();
-	//I'm pretty sure the gauss rifle ran only within interrupts...
 	while (1) {
 		//Serial.println(adc_read_value);
 	}

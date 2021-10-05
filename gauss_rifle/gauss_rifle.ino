@@ -61,7 +61,7 @@ WHAT I NEED:
 
 #define TRIGGER_VAL 76
 #define RESET_VAL 80
-volatile uint8_t fired = 0;
+volatile uint8_t fired = 1;
 
 #define GATE_COMP_VAL 120
 #define GATE_PRESCALER CLK_256

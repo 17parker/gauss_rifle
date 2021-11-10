@@ -18,13 +18,17 @@ void stop_timer1() { TCCR1B &= 0b11111000; }
 void start_timer1() { TCCR1B |= GATE_PRESCALER; }
 
 ISR(TIMER1_COMPA_vect) {
-	stop_timer1();
-	fired = 1;
-	//toggle_pinB(PIN_13);
+	/*
+	I'm using a timer (basically PWM)
+	The PWM starts HIGH, when it goes LOW the interrupt is triggered
+	*/
+	stop_timer1();	//Stops the timer so there is only 1 pulse
+	fired = 1;		//Flag, otherwise it'll keep re-firing
 }
 
 ISR(ADC_vect) {
-	//adc_read_8_bit();
+	//When the ADC finishes reading the pin, this interrupt triggers
+	//ADC is in free-running mode, so it'll immediately start reading again
 	if (ADCH <= TRIGGER_VAL) {
 		if (fired)
 			return;
@@ -36,37 +40,50 @@ ISR(ADC_vect) {
 }
 
 int main() {
-	//Serial.begin(115200);
-	cli();
-	init_ports();
-	//built in led
-	//disable_pullupB(PIN_13);
-	//set_outputB(PIN_13);
+	/***
+	* This block, until the line "while(1)" is essentially "void setup()"
+	***/
 
+	cli();		//Disable global interrupts
+	init_ports();	//Set all pins as INPUT_PULLUP
+
+	//Self explanatory
 	disable_pullupB(GATE_PIN);
 	disable_pullupD(LED1);
 	disable_pullupC(SENSOR1);
 	set_outputB(GATE_PIN);
 	set_outputD(LED1);
-	//Setup the sensor's LED
-	set_timer0(WGM_FAST_TOP, CLK_1, 0b10, LED1_DUTY);
 
-	//Setup the sensor's ADC
-	adc_select_pin(ADC0);
-	adc_disable_interrupt();
-	adc_enable_adc();
+	//Setup the sensor's LED
+	set_timer0(WGM_FAST_TOP, CLK_1, 0b10, LED1_DUTY);	//A lot happens in this function
+
+	//Enable the ADC input on ADC0
+	ADMUX &= 0b11110000;	//Clear current MUX3:0
+	ADMUX |= ADC0;			//Write new MUX3:0
+
+	ADCSRA &= ~(1 << 3);	//Disable the ADC interrupt during setup
+	ADCSRA |= 0b10000000;	//Enable the ADC
 	adc_set_prescaler(ADC_PRESCALER_8);
-	adc_set_free_run_trigger_source();
-	adc_enable_auto_trigger();
-	adc_init();
+	ADCSRB &= 0b11111000;	//Set ADC free run mode (trigger new analog read right after it finishes)
+	ADCSRA |= (1 << 5);	//Enable ADC auto trigger (When user-specified event happens, trigger analog read)
+	
+	//This sets the reference voltage for the ADC to Vcc, selected ADC pin to ADC0
+	//There needs to be a capacitor from AREF to Vcc if the reference value is Vcc
+	//The read value is left-adjusted (ADLAR = 1)
+	ADMUX = (1 << 5) | (1 << 6);
+	ADCSRA |= (1 << 6);		//Starts the reading, first read takes 25 cycles vs 13
 
 	//Setup the gate's timer
-	set_timer1(FAST_8_BIT, CLK_OFF, 0b10, GATE_COMP_VAL);
+	set_timer1(FAST_8_BIT, CLK_OFF, 0b10, GATE_COMP_VAL);	//A lot happens here
 
-	timer1_interrupt_masks(0b00000010);
-	adc_enable_interrupt();
-	sei();
+	TIMSK1 = 0b00000010;	//Un-mask interrupt for ADC0
+	//Enable the ADC interrupt
+	ADCSRA = (1 << 7) | (1 << 6) | (1 << 5) | (1 << 3) | (1 << 2) | (1 << 1) | 1;
+	
+	sei(); 	//Enable global interrupts
+
+	//This is essentially "void loop()"
 	while (1) {
-		//Serial.println(adc_read_value);
+		//It's all in interrupts, so nothing happens here
 	}
 }

@@ -1,4 +1,4 @@
-A simple coilgun (gauss gun) controller program
+A simple coil gun (gauss gun) controller program
 
 An LED, and a photoresistor across from it, detect when the barrel is obscured. When the voltage across the photoresistor drops, the coil is activated for a precise amount of time (a little over 2ms). The coil is powered by a 50 volt, 60,000 microfarad capacitor bank, and power to it is managed with 3 power MOSFETS, each rated for a few hundred continuous amps. 
 

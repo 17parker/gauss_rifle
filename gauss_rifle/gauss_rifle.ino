@@ -44,23 +44,18 @@ int main() {
 
 	//Set up the sensor LED
 	set_timer0(WGM_FAST_TOP, CLK_1, 0b10, LED1_DUTY);
-
-	ADMUX &= 0b11110000;
-	ADMUX |= ADC0;		
-	ADCSRA &= ~(1 << 3);	
-	ADCSRA |= 0b10000000;	
-	adc_set_prescaler(ADC_PRESCALER_8);
-	ADCSRB &= 0b11111000;	//Set ADC free run mode
-	ADCSRA |= (1 << 5);	//Enable ADC auto trigger
-	//There needs to be a capacitor from AREF to Vcc if the reference value is Vcc
-	ADMUX = (1 << 5) | (1 << 6);
-	ADCSRA |= (1 << 6);		//Starts the reading, first read takes 25 cycles vs 13
-
+	
 	//Setup the gate's timer
 	set_timer1(FAST_8_BIT, CLK_OFF, 0b10, GATE_COMP_VAL);
-
 	TIMSK1 = 0b00000010;
-	ADCSRA = (1 << 7) | (1 << 6) | (1 << 5) | (1 << 3) | (1 << 2) | (1 << 1) | 1;
+	
+	//There needs to be a capacitor from AREF to Vcc if the reference value is Vcc
+	ADMUX = (1 << 5) | (1 << 6); //Reference voltage is VCC with capacitor at AREF pin, ADC output is left adjusted
+
+	ADCSRB &= 0b11111000;		//Set ADC free run mode
+	//Enable ADC, start conversion, Auto trigger enable, Interrupt enable, ADC Prescaler Div. factor = 8
+	ADCSRA = (1 << 7) | (1 << 6) | (1 << 5) | (1 << 3) | (1 << 1) | 1;
+
 	sei(); 
 
 	while(1){}

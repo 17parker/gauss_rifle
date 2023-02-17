@@ -1,9 +1,9 @@
 #include <ATMEGA328p.h>
 #include <ATMEGA328p_TIMERS.h>
 
-#define GATE_PIN PIN_9  //GATE PIN - PB1 - PWM OC1A
+#define GATE_PIN PIN_9  	//GATE PIN - PB1 - PWM OC1A
 #define LED1 PIN_6		//LED1 PIN - PD6 - PWM OC0A
-#define SENSOR1 PIN_A0  //PC0
+#define SENSOR1 PIN_A0 		//PC0
 
 #define LED1_DUTY 120 //0-255, duty cycle of LED PWM
 
